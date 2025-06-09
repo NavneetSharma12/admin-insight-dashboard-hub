@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
@@ -9,7 +8,7 @@ import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { usePermissions } from '../contexts/PermissionContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { Card, Typography } from 'antd';
 
 const { Title, Text } = Typography;

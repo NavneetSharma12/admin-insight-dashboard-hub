@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, Typography, Button } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
-import { usePermissions } from '../contexts/PermissionContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { Permission } from '../types/permissions';
 
 const { Title, Text } = Typography;

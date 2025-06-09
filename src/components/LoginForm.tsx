@@ -1,30 +1,22 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Card, Form, Input, Button, Alert, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { usePermissions } from '../contexts/PermissionContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 const { Title, Text } = Typography;
 
 const LoginForm: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { login } = usePermissions();
+  const { login, loading, error, clearError } = usePermissions();
+
+  useEffect(() => {
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
 
   const onFinish = async (values: { email: string; password: string }) => {
-    setLoading(true);
-    setError('');
-    
-    try {
-      const success = await login(values.email, values.password);
-      if (!success) {
-        setError('Invalid email or password');
-      }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    await login(values.email, values.password);
   };
 
   return (
@@ -44,6 +36,8 @@ const LoginForm: React.FC = () => {
             type="error"
             className="mb-4"
             showIcon
+            closable
+            onClose={clearError}
           />
         )}
 

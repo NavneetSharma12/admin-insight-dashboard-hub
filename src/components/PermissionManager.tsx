@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Select, Checkbox, Typography, Space, Tag } from 'antd';
 import { EditOutlined, UserOutlined } from '@ant-design/icons';
-import { usePermissions } from '../contexts/PermissionContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { Permission, Role } from '../types/permissions';
 import { ALL_PERMISSIONS, PERMISSION_LABELS, DEFAULT_ROLE_PERMISSIONS } from '../config/permissions';
 import ProtectedRoute from './ProtectedRoute';
