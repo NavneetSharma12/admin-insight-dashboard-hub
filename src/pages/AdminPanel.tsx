@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
@@ -11,15 +10,14 @@ import ActivityFilter from '../components/ActivityFilter';
 import SocietyManagement from '../components/SocietyManagement';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { SocietyProvider } from '../contexts/SocietyContext';
-import { usePermissions } from '../hooks/usePermissions';
+import { getCurrentUser } from '../hooks/usePermissions';
 import { Card, Typography } from 'antd';
 
 const { Title, Text } = Typography;
 
 const AdminPanel: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const { user } = usePermissions();
+  const user = getCurrentUser();
 
   if (!user) {
     return <LoginForm />;
@@ -138,11 +136,9 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <SocietyProvider>
-      <AdminLayout currentPage={currentPage} onMenuSelect={setCurrentPage}>
-        {renderContent()}
-      </AdminLayout>
-    </SocietyProvider>
+    <AdminLayout currentPage={currentPage} onMenuSelect={setCurrentPage}>
+      {renderContent()}
+    </AdminLayout>
   );
 };
 

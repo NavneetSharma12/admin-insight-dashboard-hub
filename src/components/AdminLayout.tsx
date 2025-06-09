@@ -15,7 +15,7 @@ import {
   LogoutOutlined,
   HomeOutlined
 } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { getCurrentUser } from '../hooks/usePermissions';
 import GlobalSearch from './GlobalSearch';
 import { Society } from '../types/society';
 
@@ -30,12 +30,16 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenuSelect }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const { user, logout, hasPermission } = usePermissions();
+  const user = getCurrentUser();
 
   const handleSocietySelect = (society: Society) => {
     console.log('Selected society:', society);
-    // You can implement navigation to society details here
     onMenuSelect('society-details');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_user');
+    window.location.reload();
   };
 
   const userMenu = (
@@ -44,11 +48,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
         Profile Settings
       </Menu.Item>
       <Menu.Divider />
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
         Logout
       </Menu.Item>
     </Menu>
   );
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(permission as any);
+  };
 
   const menuItems = [
     {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, Typography, Button } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { getCurrentUser } from '../hooks/usePermissions';
 import { Permission } from '../types/permissions';
 
 const { Title, Text } = Typography;
@@ -22,7 +22,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAll = false,
   fallback
 }) => {
-  const { hasPermission, hasAnyPermission } = usePermissions();
+  const user = getCurrentUser();
+
+  const hasPermission = (perm: Permission): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(perm);
+  };
+
+  const hasAnyPermission = (perms: Permission[]): boolean => {
+    if (!user) return false;
+    return perms.some(p => hasPermission(p));
+  };
 
   const hasAccess = () => {
     if (permission) {

@@ -1,16 +1,44 @@
 
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from './redux';
-import { loginUser, logout, updateUserPermissions, loadUserFromStorage, clearError } from '../store/slices/permissionSlice';
-import { Permission, Role } from '../types/permissions';
+import { useState, useEffect } from 'react';
+import { Permission, Role, User } from '../types/permissions';
+import { DEFAULT_ROLE_PERMISSIONS } from '../config/permissions';
+
+// Mock users for demo - replace with your backend API
+const mockUsers: User[] = [
+  {
+    id: '1',
+    name: 'Super Admin',
+    email: 'super@admin.com',
+    role: 'super_admin',
+    permissions: DEFAULT_ROLE_PERMISSIONS.super_admin
+  },
+  {
+    id: '2',
+    name: 'Admin User',
+    email: 'admin@admin.com',
+    role: 'admin',
+    permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+    societyId: '1',
+    societyName: 'Green Valley Apartments'
+  }
+];
+
+let currentUser: User | null = null;
 
 export const usePermissions = () => {
-  const dispatch = useAppDispatch();
-  const { user, loading, error } = useAppSelector((state) => state.permission);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    dispatch(loadUserFromStorage());
-  }, [dispatch]);
+    // Check for existing session
+    const savedUser = localStorage.getItem('admin_user');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      currentUser = parsedUser;
+    }
+  }, []);
 
   const hasPermission = (permission: Permission): boolean => {
     if (!user) return false;
@@ -28,20 +56,47 @@ export const usePermissions = () => {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const result = await dispatch(loginUser({ email, password }));
-    return result.type === loginUser.fulfilled.type;
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Mock authentication - replace with your backend API
+      const foundUser = mockUsers.find(u => u.email === email);
+      if (foundUser && password === 'admin123') {
+        setUser(foundUser);
+        currentUser = foundUser;
+        localStorage.setItem('admin_user', JSON.stringify(foundUser));
+        setLoading(false);
+        return true;
+      }
+      setError('Invalid email or password');
+      setLoading(false);
+      return false;
+    } catch (err) {
+      setError('Login failed. Please try again.');
+      setLoading(false);
+      return false;
+    }
   };
 
-  const logoutUser = () => {
-    dispatch(logout());
+  const logout = () => {
+    setUser(null);
+    currentUser = null;
+    setError(null);
+    localStorage.removeItem('admin_user');
   };
 
-  const updatePermissions = (userId: string, permissions: Permission[]) => {
-    dispatch(updateUserPermissions({ userId, permissions }));
+  const updateUserPermissions = (userId: string, permissions: Permission[]) => {
+    if (user && user.id === userId) {
+      const updatedUser = { ...user, permissions };
+      setUser(updatedUser);
+      currentUser = updatedUser;
+      localStorage.setItem('admin_user', JSON.stringify(updatedUser));
+    }
   };
 
-  const clearLoginError = () => {
-    dispatch(clearError());
+  const clearError = () => {
+    setError(null);
   };
 
   return {
@@ -52,8 +107,17 @@ export const usePermissions = () => {
     hasAnyPermission,
     isRole,
     login,
-    logout: logoutUser,
-    updateUserPermissions: updatePermissions,
-    clearError: clearLoginError,
+    logout,
+    updateUserPermissions,
+    clearError,
   };
+};
+
+// Export current user for components that need it without hooks
+export const getCurrentUser = (): User | null => {
+  const savedUser = localStorage.getItem('admin_user');
+  if (savedUser) {
+    return JSON.parse(savedUser);
+  }
+  return currentUser;
 };

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input, Modal, List, Avatar, Typography, Badge } from 'antd';
 import { SearchOutlined, HomeOutlined } from '@ant-design/icons';
 import { Society } from '../types/society';
-import { usePermissions } from '../hooks/usePermissions';
-import { useSociety } from '../contexts/SocietyContext';
+import { getCurrentUser } from '../hooks/usePermissions';
+import { setCurrentSociety } from '../hooks/useSociety';
 
 const { Text } = Typography;
 
@@ -15,8 +16,6 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Society[]>([]);
-  const { hasPermission } = usePermissions();
-  const { setSelectedSociety } = useSociety();
 
   // Mock societies data - replace with your backend API
   const mockSocieties: Society[] = [
@@ -74,19 +73,21 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
   }, [searchTerm]);
 
   const handleSearchClick = () => {
-    if (hasPermission('society.view_all')) {
+    const user = getCurrentUser();
+    if (user && user.permissions.includes('society.view_all')) {
       setIsVisible(true);
     }
   };
 
   const handleSocietyClick = (society: Society) => {
-    setSelectedSociety(society);
+    setCurrentSociety(society);
     onSocietySelect(society);
     setIsVisible(false);
     setSearchTerm('');
   };
 
-  if (!hasPermission('society.view_all')) {
+  const user = getCurrentUser();
+  if (!user || !user.permissions.includes('society.view_all')) {
     return null;
   }
 
