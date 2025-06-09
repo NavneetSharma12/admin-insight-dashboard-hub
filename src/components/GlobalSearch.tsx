@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input, Modal, List, Avatar, Typography, Badge } from 'antd';
 import { SearchOutlined, HomeOutlined } from '@ant-design/icons';
 import { Society } from '../types/society';
 import { usePermissions } from '../hooks/usePermissions';
+import { useSociety } from '../contexts/SocietyContext';
 
 const { Text } = Typography;
 
@@ -16,6 +16,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Society[]>([]);
   const { hasPermission } = usePermissions();
+  const { setSelectedSociety } = useSociety();
 
   // Mock societies data - replace with your backend API
   const mockSocieties: Society[] = [
@@ -79,6 +80,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
   };
 
   const handleSocietyClick = (society: Society) => {
+    setSelectedSociety(society);
     onSocietySelect(society);
     setIsVisible(false);
     setSearchTerm('');

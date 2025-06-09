@@ -94,6 +94,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
       hidden: !hasPermission('permissions.view'),
       children: [
         { key: 'role-control', label: 'Role-Based Access', hidden: !hasPermission('permissions.view') },
+        { key: 'user-management', label: 'User Management', hidden: !hasPermission('permissions.edit') },
         { key: 'permissions-list', label: 'Permissions List', hidden: !hasPermission('permissions.view') },
         { key: 'edit-permissions', label: 'Edit Permissions', hidden: !hasPermission('permissions.edit') },
       ].filter(item => !item.hidden),

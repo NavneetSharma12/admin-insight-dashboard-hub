@@ -5,11 +5,13 @@ import Dashboard from '../components/Dashboard';
 import ResidentList from '../components/ResidentList';
 import PendingRequests from '../components/PendingRequests';
 import PermissionManager from '../components/PermissionManager';
+import UserManagement from '../components/UserManagement';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
 import SocietyManagement from '../components/SocietyManagement';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { SocietyProvider } from '../contexts/SocietyContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { Card, Typography } from 'antd';
 
@@ -43,17 +45,9 @@ const AdminPanel: React.FC = () => {
           </ProtectedRoute>
         );
       case 'resident-list':
-        return (
-          <ProtectedRoute permission="residents.view">
-            <ResidentList />
-          </ProtectedRoute>
-        );
+        return <ResidentList />;
       case 'pending-requests':
-        return (
-          <ProtectedRoute permission="requests.view">
-            <PendingRequests />
-          </ProtectedRoute>
-        );
+        return <PendingRequests />;
       case 'resident-details':
         return (
           <ProtectedRoute permission="residents.view">
@@ -74,6 +68,8 @@ const AdminPanel: React.FC = () => {
         );
       case 'role-control':
         return <PermissionManager />;
+      case 'user-management':
+        return <UserManagement />;
       case 'permissions-list':
         return (
           <ProtectedRoute permission="permissions.view">
@@ -142,9 +138,11 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <AdminLayout currentPage={currentPage} onMenuSelect={setCurrentPage}>
-      {renderContent()}
-    </AdminLayout>
+    <SocietyProvider>
+      <AdminLayout currentPage={currentPage} onMenuSelect={setCurrentPage}>
+        {renderContent()}
+      </AdminLayout>
+    </SocietyProvider>
   );
 };
 
