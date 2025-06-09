@@ -4,7 +4,7 @@ import { Card, Table, Button, Modal, Space, Typography, Tag, Avatar, Badge } fro
 import { EyeOutlined, CheckOutlined, CloseOutlined, UserAddOutlined } from '@ant-design/icons';
 import { usePermissions } from '../hooks/usePermissions';
 import { MemberRequest } from '../types/user';
-import { useSociety } from '../contexts/SocietyContext';
+import { useSociety } from '../hooks/useSociety';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;

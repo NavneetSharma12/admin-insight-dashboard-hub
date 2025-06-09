@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
 import { usePermissions } from '../hooks/usePermissions';
 import { Resident } from '../types/user';
-import { useSociety } from '../contexts/SocietyContext';
+import { useSociety } from '../hooks/useSociety';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
