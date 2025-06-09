@@ -14,7 +14,12 @@ export type Permission =
   | 'notifications.view'
   | 'notifications.create'
   | 'reports.view'
-  | 'reports.download';
+  | 'reports.download'
+  | 'society.view'
+  | 'society.create'
+  | 'society.edit'
+  | 'society.delete'
+  | 'society.view_all';
 
 export type Role = 'super_admin' | 'admin';
 
@@ -24,6 +29,8 @@ export interface User {
   email: string;
   role: Role;
   permissions: Permission[];
+  societyId?: string;
+  societyName?: string;
 }
 
 export interface RolePermissions {

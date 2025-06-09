@@ -29,7 +29,9 @@ const mockUsers: User[] = [
     name: 'Admin User',
     email: 'admin@admin.com',
     role: 'admin',
-    permissions: DEFAULT_ROLE_PERMISSIONS.admin
+    permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+    societyId: '1',
+    societyName: 'Green Valley Apartments'
   }
 ];
 

@@ -16,7 +16,12 @@ export const ALL_PERMISSIONS: Permission[] = [
   'notifications.view',
   'notifications.create',
   'reports.view',
-  'reports.download'
+  'reports.download',
+  'society.view',
+  'society.create',
+  'society.edit',
+  'society.delete',
+  'society.view_all'
 ];
 
 export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
@@ -31,7 +36,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
     'requests.reject',
     'activity.view',
     'notifications.view',
-    'reports.view'
+    'reports.view',
+    'society.view'
   ]
 };
 
@@ -50,5 +56,10 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'notifications.view': 'View Notifications',
   'notifications.create': 'Create Notifications',
   'reports.view': 'View Reports',
-  'reports.download': 'Download Reports'
+  'reports.download': 'Download Reports',
+  'society.view': 'View Society',
+  'society.create': 'Create Society',
+  'society.edit': 'Edit Society',
+  'society.delete': 'Delete Society',
+  'society.view_all': 'View All Societies'
 };

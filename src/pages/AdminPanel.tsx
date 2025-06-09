@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
@@ -6,6 +7,7 @@ import PendingRequests from '../components/PendingRequests';
 import PermissionManager from '../components/PermissionManager';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
+import SocietyManagement from '../components/SocietyManagement';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { usePermissions } from '../hooks/usePermissions';
@@ -27,6 +29,17 @@ const AdminPanel: React.FC = () => {
         return (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
+          </ProtectedRoute>
+        );
+      case 'society-list':
+        return <SocietyManagement />;
+      case 'society-details':
+        return (
+          <ProtectedRoute permission="society.view">
+            <Card>
+              <Title level={3}>Society Details</Title>
+              <Text>Detailed view of society information, admin controls, and management features.</Text>
+            </Card>
           </ProtectedRoute>
         );
       case 'resident-list':
