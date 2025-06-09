@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Typography, Badge, Button, Dropdown } from 'antd';
 import {
@@ -14,7 +13,7 @@ import {
   NotificationOutlined,
   LogoutOutlined
 } from '@ant-design/icons';
-import { usePermissions } from '../contexts/PermissionContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 const { Sider, Header, Content } = Layout;
 const { Title } = Typography;
