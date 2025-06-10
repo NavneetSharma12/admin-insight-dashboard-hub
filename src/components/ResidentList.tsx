@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { Resident } from '../types/user';
-import { useSociety } from '../hooks/useSociety';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const ResidentList: React.FC = () => {
-  const { user, hasPermission } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
+  
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(permission as any);
+  };
+
   const [residents, setResidents] = useState<Resident[]>([
     {
       id: '1',
@@ -51,13 +55,8 @@ const ResidentList: React.FC = () => {
       filtered = filtered.filter(resident => resident.societyId === user.societyId);
     }
     
-    // Filter by selected society if one is selected
-    if (selectedSociety) {
-      filtered = filtered.filter(resident => resident.societyId === selectedSociety.id);
-    }
-    
     setFilteredResidents(filtered);
-  }, [residents, user, selectedSociety]);
+  }, [residents, user]);
 
   const handleViewDetails = (resident: Resident) => {
     setSelectedResident(resident);
@@ -157,7 +156,7 @@ const ResidentList: React.FC = () => {
             <div>
               <Title level={3} className="!mb-1">
                 Resident Profiles
-                {selectedSociety && ` - ${selectedSociety.name}`}
+                {user?.societyName && ` - ${user.societyName}`}
               </Title>
               <Text className="text-gray-600">
                 Manage resident information and profiles

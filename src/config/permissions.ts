@@ -21,7 +21,11 @@ export const ALL_PERMISSIONS: Permission[] = [
   'society.create',
   'society.edit',
   'society.delete',
-  'society.view_all'
+  'society.view_all',
+  'staff.view',
+  'staff.create',
+  'staff.edit',
+  'staff.delete'
 ];
 
 export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
@@ -37,7 +41,10 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
     'activity.view',
     'notifications.view',
     'reports.view',
-    'society.view'
+    'society.view',
+    'staff.view',
+    'staff.create',
+    'staff.edit'
   ]
 };
 
@@ -61,5 +68,9 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'society.create': 'Create Society',
   'society.edit': 'Edit Society',
   'society.delete': 'Delete Society',
-  'society.view_all': 'View All Societies'
+  'society.view_all': 'View All Societies',
+  'staff.view': 'View Staff',
+  'staff.create': 'Create Staff',
+  'staff.edit': 'Edit Staff',
+  'staff.delete': 'Delete Staff'
 };

@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, DatePicker } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, DollarCircleOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
-import { useSociety } from '../hooks/useSociety';
+import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
@@ -23,8 +21,7 @@ interface Bill {
 }
 
 const BillingManagement: React.FC = () => {
-  const { user } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
   
   const [bills, setBills] = useState<Bill[]>([
     {
@@ -58,7 +55,7 @@ const BillingManagement: React.FC = () => {
 
   const filteredBills = bills.filter(bill => {
     if (user?.role === 'super_admin') {
-      return selectedSociety ? bill.societyId === selectedSociety.id : true;
+      return true;
     }
     return bill.societyId === user?.societyId;
   });
@@ -68,8 +65,8 @@ const BillingManagement: React.FC = () => {
       id: Date.now().toString(),
       ...values,
       status: 'pending',
-      societyId: selectedSociety?.id || user?.societyId || '1',
-      societyName: selectedSociety?.name || user?.societyName || 'Default Society',
+      societyId: user?.societyId || '1',
+      societyName: user?.societyName || 'Default Society',
       createdAt: new Date().toISOString().split('T')[0]
     };
     
@@ -150,7 +147,7 @@ const BillingManagement: React.FC = () => {
             <div>
               <Title level={3} className="!mb-1">
                 Billing & Accounting
-                {selectedSociety && ` - ${selectedSociety.name}`}
+                {user?.societyName && ` - ${user.societyName}`}
               </Title>
               <Text className="text-gray-600">
                 Manage bills, payments and financial reports

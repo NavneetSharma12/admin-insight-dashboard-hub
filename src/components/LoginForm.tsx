@@ -2,21 +2,27 @@
 import React, { useEffect } from 'react';
 import { Card, Form, Input, Button, Alert, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loginUser, clearError } from '../store/slices/authSlice';
 
 const { Title, Text } = Typography;
 
 const LoginForm: React.FC = () => {
-  const { login, loading, error, clearError } = usePermissions();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     return () => {
-      clearError();
+      dispatch(clearError());
     };
-  }, [clearError]);
+  }, [dispatch]);
 
   const onFinish = async (values: { email: string; password: string }) => {
-    await login(values.email, values.password);
+    await dispatch(loginUser(values.email, values.password));
+  };
+
+  const handleClearError = () => {
+    dispatch(clearError());
   };
 
   return (
@@ -37,7 +43,7 @@ const LoginForm: React.FC = () => {
             className="mb-4"
             showIcon
             closable
-            onClose={clearError}
+            onClose={handleClearError}
           />
         )}
 

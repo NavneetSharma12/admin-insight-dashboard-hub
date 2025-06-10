@@ -19,7 +19,11 @@ export type Permission =
   | 'society.create'
   | 'society.edit'
   | 'society.delete'
-  | 'society.view_all';
+  | 'society.view_all'
+  | 'staff.view'
+  | 'staff.create'
+  | 'staff.edit'
+  | 'staff.delete';
 
 export type Role = 'super_admin' | 'admin';
 

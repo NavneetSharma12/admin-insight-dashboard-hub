@@ -2,16 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Space, Typography, Tag, Avatar, Badge } from 'antd';
 import { EyeOutlined, CheckOutlined, CloseOutlined, UserAddOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { MemberRequest } from '../types/user';
-import { useSociety } from '../hooks/useSociety';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
 
 const PendingRequests: React.FC = () => {
-  const { user, hasPermission } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
+  
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(permission as any);
+  };
+
   const [requests, setRequests] = useState<MemberRequest[]>([
     {
       id: '1',
@@ -53,13 +57,8 @@ const PendingRequests: React.FC = () => {
       filtered = filtered.filter(request => request.societyId === user.societyId);
     }
     
-    // Filter by selected society if one is selected
-    if (selectedSociety) {
-      filtered = filtered.filter(request => request.societyId === selectedSociety.id);
-    }
-    
     setFilteredRequests(filtered);
-  }, [requests, user, selectedSociety]);
+  }, [requests, user]);
 
   const handleApprove = (requestId: string) => {
     setRequests(prev => 
@@ -196,7 +195,6 @@ const PendingRequests: React.FC = () => {
                 {pendingCount > 0 && (
                   <Badge count={pendingCount} className="ml-2" />
                 )}
-                {selectedSociety && ` - ${selectedSociety.name}`}
               </Title>
               <Text className="text-gray-600">
                 Review and manage new resident applications

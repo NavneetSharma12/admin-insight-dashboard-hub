@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
 import { PlusOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { User, CreateUserRequest } from '../types/user';
 import { Society } from '../types/society';
 import { Permission, Role } from '../types/permissions';
@@ -13,7 +12,18 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 const UserManagement: React.FC = () => {
-  const { user, isRole, hasPermission } = usePermissions();
+  const { user } = useAppSelector((state) => state.auth);
+  
+  const isRole = (role: Role): boolean => {
+    if (!user) return false;
+    return user.role === role;
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(permission as any);
+  };
+
   const [users, setUsers] = useState<User[]>([
     {
       id: '1',

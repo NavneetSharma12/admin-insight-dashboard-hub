@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar, Badge } from 'antd';
 import { PlusOutlined, EditOutlined, EyeOutlined, HomeOutlined, UserOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { Society, CreateSocietyRequest } from '../types/society';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -11,7 +10,13 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const SocietyManagement: React.FC = () => {
-  const { user, hasPermission } = usePermissions();
+  const { user } = useAppSelector((state) => state.auth);
+  
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    return user.permissions.includes(permission as any);
+  };
+
   const [societies, setSocieties] = useState<Society[]>([
     {
       id: '1',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Select, Checkbox, Typography, Space, Tag } from 'antd';
 import { EditOutlined, UserOutlined } from '@ant-design/icons';
-import { getCurrentUser } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { Permission, Role } from '../types/permissions';
 import { ALL_PERMISSIONS, PERMISSION_LABELS, DEFAULT_ROLE_PERMISSIONS } from '../config/permissions';
 import ProtectedRoute from './ProtectedRoute';
@@ -18,10 +18,15 @@ interface AdminUser {
 }
 
 const PermissionManager: React.FC = () => {
-  const user = getCurrentUser();
+  const { user } = useAppSelector((state) => state.auth);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [form] = Form.useForm();
+
+  const isRole = (role: Role): boolean => {
+    if (!user) return false;
+    return user.role === role;
+  };
 
   // Mock admin users - replace with your backend API
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([
@@ -40,11 +45,6 @@ const PermissionManager: React.FC = () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.admin
     }
   ]);
-
-  const isRole = (role: Role): boolean => {
-    if (!user) return false;
-    return user.role === role;
-  };
 
   const updateUserPermissions = (userId: string, permissions: Permission[]) => {
     if (user && user.id === userId) {
