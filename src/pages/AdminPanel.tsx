@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
+import SuperAdminDashboard from '../components/SuperAdminDashboard';
 import ResidentList from '../components/ResidentList';
 import PendingRequests from '../components/PendingRequests';
 import PermissionManager from '../components/PermissionManager';
@@ -8,6 +10,10 @@ import UserManagement from '../components/UserManagement';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
 import SocietyManagement from '../components/SocietyManagement';
+import BillingManagement from '../components/BillingManagement';
+import ComplaintManagement from '../components/ComplaintManagement';
+import FacilityBooking from '../components/FacilityBooking';
+import StaffManagement from '../components/StaffManagement';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { getCurrentUser } from '../hooks/usePermissions';
@@ -26,7 +32,7 @@ const AdminPanel: React.FC = () => {
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return (
+        return user?.role === 'super_admin' ? <SuperAdminDashboard /> : (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
           </ProtectedRoute>
@@ -64,6 +70,14 @@ const AdminPanel: React.FC = () => {
             </Card>
           </ProtectedRoute>
         );
+      case 'billing-management':
+        return <BillingManagement />;
+      case 'complaint-management':
+        return <ComplaintManagement />;
+      case 'facility-booking':
+        return <FacilityBooking />;
+      case 'staff-management':
+        return <StaffManagement />;
       case 'role-control':
         return <PermissionManager />;
       case 'user-management':
@@ -127,7 +141,7 @@ const AdminPanel: React.FC = () => {
           </ProtectedRoute>
         );
       default:
-        return (
+        return user?.role === 'super_admin' ? <SuperAdminDashboard /> : (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
           </ProtectedRoute>

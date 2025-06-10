@@ -13,7 +13,11 @@ import {
   SecurityScanOutlined,
   NotificationOutlined,
   LogoutOutlined,
-  HomeOutlined
+  HomeOutlined,
+  DollarCircleOutlined,
+  ExclamationCircleOutlined,
+  CalendarOutlined,
+  ToolOutlined
 } from '@ant-design/icons';
 import { getCurrentUser } from '../hooks/usePermissions';
 import GlobalSearch from './GlobalSearch';
@@ -79,7 +83,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
     {
       key: 'residents',
       icon: <TeamOutlined />,
-      label: 'Resident Profiles',
+      label: 'Resident Management',
       hidden: !hasPermission('residents.view'),
       children: [
         { key: 'resident-list', label: 'Resident List', hidden: !hasPermission('residents.view') },
@@ -87,13 +91,49 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
       ].filter(item => !item.hidden),
     },
     {
-      key: 'member-requests',
+      key: 'requests',
       icon: <UserAddOutlined />,
-      label: 'New Member Requests',
+      label: 'Member Requests',
       hidden: !hasPermission('requests.view'),
       children: [
         { key: 'pending-requests', label: 'Pending Requests', hidden: !hasPermission('requests.view') },
         { key: 'approval-history', label: 'Approval History', hidden: !hasPermission('requests.view') },
+      ].filter(item => !item.hidden),
+    },
+    {
+      key: 'billing',
+      icon: <DollarCircleOutlined />,
+      label: 'Billing & Accounting',
+      hidden: !hasPermission('reports.view'),
+      children: [
+        { key: 'billing-management', label: 'Billing Management', hidden: !hasPermission('reports.view') },
+      ].filter(item => !item.hidden),
+    },
+    {
+      key: 'complaints',
+      icon: <ExclamationCircleOutlined />,
+      label: 'Complaint Management',
+      hidden: !hasPermission('requests.view'),
+      children: [
+        { key: 'complaint-management', label: 'View Complaints', hidden: !hasPermission('requests.view') },
+      ].filter(item => !item.hidden),
+    },
+    {
+      key: 'facilities',
+      icon: <CalendarOutlined />,
+      label: 'Facility Booking',
+      hidden: !hasPermission('requests.view'),
+      children: [
+        { key: 'facility-booking', label: 'Manage Bookings', hidden: !hasPermission('requests.view') },
+      ].filter(item => !item.hidden),
+    },
+    {
+      key: 'staff',
+      icon: <ToolOutlined />,
+      label: 'Staff & Vendors',
+      hidden: !hasPermission('residents.view'),
+      children: [
+        { key: 'staff-management', label: 'Staff Management', hidden: !hasPermission('residents.view') },
       ].filter(item => !item.hidden),
     },
     {
