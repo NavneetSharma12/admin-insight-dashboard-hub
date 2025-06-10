@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
-import { useSociety } from '../hooks/useSociety';
+import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
@@ -27,8 +25,7 @@ interface Complaint {
 }
 
 const ComplaintManagement: React.FC = () => {
-  const { user } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
   
   const [complaints, setComplaints] = useState<Complaint[]>([
     {
@@ -67,7 +64,7 @@ const ComplaintManagement: React.FC = () => {
 
   const filteredComplaints = complaints.filter(complaint => {
     if (user?.role === 'super_admin') {
-      return selectedSociety ? complaint.societyId === selectedSociety.id : true;
+      return true;
     }
     return complaint.societyId === user?.societyId;
   });
@@ -181,7 +178,7 @@ const ComplaintManagement: React.FC = () => {
             <div>
               <Title level={3} className="!mb-1">
                 Complaint Management
-                {selectedSociety && ` - ${selectedSociety.name}`}
+                {user?.societyName && ` - ${user.societyName}`}
               </Title>
               <Text className="text-gray-600">
                 Track and resolve resident complaints

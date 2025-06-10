@@ -2,8 +2,7 @@
 import React, { useState } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
 import { PlusOutlined, EyeOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
-import { useSociety } from '../hooks/useSociety';
+import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
@@ -12,46 +11,43 @@ const { Option } = Select;
 interface Staff {
   id: string;
   name: string;
-  role: string;
   phone: string;
-  email?: string;
-  shift: string;
+  email: string;
+  role: string;
+  department: string;
   status: 'active' | 'inactive';
   societyId: string;
   societyName: string;
-  joinDate: string;
-  salary?: number;
+  createdAt: string;
 }
 
 const StaffManagement: React.FC = () => {
-  const { user } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
   
   const [staff, setStaff] = useState<Staff[]>([
     {
       id: '1',
-      name: 'Ram Kumar',
-      role: 'Security Guard',
+      name: 'Security Guard',
       phone: '+91 9876543210',
-      email: 'ram@security.com',
-      shift: 'Night (10 PM - 6 AM)',
+      email: 'security@society.com',
+      role: 'Security',
+      department: 'Security',
       status: 'active',
       societyId: '1',
       societyName: 'Green Valley Apartments',
-      joinDate: '2024-01-01',
-      salary: 25000
+      createdAt: '2024-01-15'
     },
     {
       id: '2',
-      name: 'Sita Devi',
-      role: 'Housekeeping',
+      name: 'Maintenance Staff',
       phone: '+91 9876543211',
-      shift: 'Morning (8 AM - 4 PM)',
+      email: 'maintenance@society.com',
+      role: 'Maintenance',
+      department: 'Maintenance',
       status: 'active',
       societyId: '1',
       societyName: 'Green Valley Apartments',
-      joinDate: '2024-01-15',
-      salary: 20000
+      createdAt: '2024-01-10'
     }
   ]);
 
@@ -60,7 +56,7 @@ const StaffManagement: React.FC = () => {
 
   const filteredStaff = staff.filter(member => {
     if (user?.role === 'super_admin') {
-      return selectedSociety ? member.societyId === selectedSociety.id : true;
+      return true;
     }
     return member.societyId === user?.societyId;
   });
@@ -70,9 +66,9 @@ const StaffManagement: React.FC = () => {
       id: Date.now().toString(),
       ...values,
       status: 'active',
-      societyId: selectedSociety?.id || user?.societyId || '1',
-      societyName: selectedSociety?.name || user?.societyName || 'Default Society',
-      joinDate: new Date().toISOString().split('T')[0]
+      societyId: user?.societyId || '1',
+      societyName: user?.societyName || 'Default Society',
+      createdAt: new Date().toISOString().split('T')[0]
     };
     
     setStaff(prev => [...prev, newStaff]);
@@ -80,13 +76,21 @@ const StaffManagement: React.FC = () => {
     form.resetFields();
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'success';
+      case 'inactive': return 'error';
+      default: return 'default';
+    }
+  };
+
   const columns = [
     {
       title: 'Staff Member',
       key: 'staff',
       render: (_, record: Staff) => (
-        <div className="flex items-center space-x-3">
-          <Avatar icon={<UserOutlined />} className="bg-green-600" />
+        <div className="flex items-center space-x-2">
+          <Avatar icon={<UserOutlined />} size="small" />
           <div>
             <div className="font-medium">{record.name}</div>
             <div className="text-sm text-gray-500">{record.role}</div>
@@ -99,28 +103,22 @@ const StaffManagement: React.FC = () => {
       key: 'contact',
       render: (_, record: Staff) => (
         <div>
-          <div className="text-sm">{record.phone}</div>
-          {record.email && <div className="text-sm text-gray-500">{record.email}</div>}
+          <div className="font-medium">{record.phone}</div>
+          <div className="text-sm text-gray-500">{record.email}</div>
         </div>
       ),
     },
     {
-      title: 'Shift',
-      dataIndex: 'shift',
-      key: 'shift',
-    },
-    {
-      title: 'Salary',
-      dataIndex: 'salary',
-      key: 'salary',
-      render: (salary: number) => salary ? `₹${salary.toLocaleString()}` : 'N/A',
+      title: 'Department',
+      dataIndex: 'department',
+      key: 'department',
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={status === 'active' ? 'success' : 'error'}>
+        <Tag color={getStatusColor(status)}>
           {status.toUpperCase()}
         </Tag>
       ),
@@ -144,17 +142,17 @@ const StaffManagement: React.FC = () => {
   ].filter(col => !col.hidden);
 
   return (
-    <ProtectedRoute permission="residents.view">
+    <ProtectedRoute permission="staff.view">
       <div className="space-y-6">
         <Card>
           <div className="flex items-center justify-between mb-6">
             <div>
               <Title level={3} className="!mb-1">
-                Staff & Vendor Management
-                {selectedSociety && ` - ${selectedSociety.name}`}
+                Staff Management
+                {user?.societyName && ` - ${user.societyName}`}
               </Title>
               <Text className="text-gray-600">
-                Manage security, housekeeping and vendor staff
+                Manage staff members and their assignments
               </Text>
             </div>
             <Button
@@ -204,63 +202,59 @@ const StaffManagement: React.FC = () => {
               </Form.Item>
 
               <Form.Item
+                name="phone"
+                label="Phone Number"
+                rules={[{ required: true, message: 'Please enter phone number!' }]}
+              >
+                <Input placeholder="Enter phone number" />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { required: true, message: 'Please enter email!' },
+                { type: 'email', message: 'Please enter a valid email!' }
+              ]}
+            >
+              <Input placeholder="Enter email address" />
+            </Form.Item>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
                 name="role"
                 label="Role"
                 rules={[{ required: true, message: 'Please select role!' }]}
               >
                 <Select placeholder="Select role">
-                  <Option value="Security Guard">Security Guard</Option>
+                  <Option value="Security">Security Guard</Option>
+                  <Option value="Maintenance">Maintenance Staff</Option>
                   <Option value="Housekeeping">Housekeeping</Option>
-                  <Option value="Maintenance">Maintenance</Option>
                   <Option value="Gardener">Gardener</Option>
-                  <Option value="Vendor">Vendor</Option>
-                </Select>
-              </Form.Item>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="phone"
-                label="Phone"
-                rules={[{ required: true, message: 'Please enter phone number!' }]}
-              >
-                <Input placeholder="Enter phone number" />
-              </Form.Item>
-
-              <Form.Item
-                name="email"
-                label="Email"
-              >
-                <Input placeholder="Enter email (optional)" />
-              </Form.Item>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="shift"
-                label="Shift"
-                rules={[{ required: true, message: 'Please enter shift details!' }]}
-              >
-                <Select placeholder="Select shift">
-                  <Option value="Morning (8 AM - 4 PM)">Morning (8 AM - 4 PM)</Option>
-                  <Option value="Evening (4 PM - 10 PM)">Evening (4 PM - 10 PM)</Option>
-                  <Option value="Night (10 PM - 6 AM)">Night (10 PM - 6 AM)</Option>
-                  <Option value="Full Day">Full Day</Option>
+                  <Option value="Other">Other</Option>
                 </Select>
               </Form.Item>
 
               <Form.Item
-                name="salary"
-                label="Monthly Salary (₹)"
+                name="department"
+                label="Department"
+                rules={[{ required: true, message: 'Please select department!' }]}
               >
-                <Input type="number" placeholder="Enter monthly salary" />
+                <Select placeholder="Select department">
+                  <Option value="Security">Security</Option>
+                  <Option value="Maintenance">Maintenance</Option>
+                  <Option value="Housekeeping">Housekeeping</Option>
+                  <Option value="Gardening">Gardening</Option>
+                  <Option value="Administration">Administration</Option>
+                </Select>
               </Form.Item>
             </div>
 
             <Form.Item>
               <Space>
                 <Button type="primary" htmlType="submit" className="bg-blue-600">
-                  Add Staff
+                  Add Staff Member
                 </Button>
                 <Button onClick={() => setIsCreateModalVisible(false)}>
                   Cancel

@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Input, Modal, List, Avatar, Typography, Badge } from 'antd';
 import { SearchOutlined, HomeOutlined } from '@ant-design/icons';
 import { Society } from '../types/society';
-import { getCurrentUser } from '../hooks/usePermissions';
-import { setCurrentSociety } from '../hooks/useSociety';
+import { useAppSelector } from '../store/hooks';
 
 const { Text } = Typography;
 
@@ -13,6 +12,7 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
+  const { user } = useAppSelector((state) => state.auth);
   const [isVisible, setIsVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Society[]>([]);
@@ -73,20 +73,17 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onSocietySelect }) => {
   }, [searchTerm]);
 
   const handleSearchClick = () => {
-    const user = getCurrentUser();
     if (user && user.permissions.includes('society.view_all')) {
       setIsVisible(true);
     }
   };
 
   const handleSocietyClick = (society: Society) => {
-    setCurrentSociety(society);
     onSocietySelect(society);
     setIsVisible(false);
     setSearchTerm('');
   };
 
-  const user = getCurrentUser();
   if (!user || !user.permissions.includes('society.view_all')) {
     return null;
   }
