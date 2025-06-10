@@ -9,21 +9,20 @@ import PermissionManager from '../components/PermissionManager';
 import UserManagement from '../components/UserManagement';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
-import SocietyManagement from '../components/SocietyManagement';
 import BillingManagement from '../components/BillingManagement';
 import ComplaintManagement from '../components/ComplaintManagement';
 import FacilityBooking from '../components/FacilityBooking';
 import StaffManagement from '../components/StaffManagement';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { getCurrentUser } from '../hooks/usePermissions';
+import { useAppSelector } from '../store/hooks';
 import { Card, Typography } from 'antd';
 
 const { Title, Text } = Typography;
 
 const AdminPanel: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const user = getCurrentUser();
+  const { user } = useAppSelector((state) => state.auth);
 
   if (!user) {
     return <LoginForm />;
@@ -35,17 +34,6 @@ const AdminPanel: React.FC = () => {
         return user?.role === 'super_admin' ? <SuperAdminDashboard /> : (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
-          </ProtectedRoute>
-        );
-      case 'society-list':
-        return <SocietyManagement />;
-      case 'society-details':
-        return (
-          <ProtectedRoute permission="society.view">
-            <Card>
-              <Title level={3}>Society Details</Title>
-              <Text>Detailed view of society information, admin controls, and management features.</Text>
-            </Card>
           </ProtectedRoute>
         );
       case 'resident-list':

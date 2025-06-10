@@ -13,15 +13,13 @@ import {
   SecurityScanOutlined,
   NotificationOutlined,
   LogoutOutlined,
-  HomeOutlined,
   DollarCircleOutlined,
   ExclamationCircleOutlined,
   CalendarOutlined,
   ToolOutlined
 } from '@ant-design/icons';
-import { getCurrentUser } from '../hooks/usePermissions';
-import GlobalSearch from './GlobalSearch';
-import { Society } from '../types/society';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../store/slices/authSlice';
 
 const { Sider, Header, Content } = Layout;
 const { Title } = Typography;
@@ -34,16 +32,11 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenuSelect }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const user = getCurrentUser();
-
-  const handleSocietySelect = (society: Society) => {
-    console.log('Selected society:', society);
-    onMenuSelect('society-details');
-  };
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_user');
-    window.location.reload();
+    dispatch(logout());
   };
 
   const userMenu = (
@@ -69,16 +62,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
       icon: <DashboardOutlined />,
       label: 'Dashboard',
       hidden: !hasPermission('dashboard.view')
-    },
-    {
-      key: 'society',
-      icon: <HomeOutlined />,
-      label: 'Society Management',
-      hidden: !hasPermission('society.view'),
-      children: [
-        { key: 'society-list', label: 'Society List', hidden: !hasPermission('society.view') },
-        { key: 'society-details', label: 'Society Details', hidden: !hasPermission('society.view') },
-      ].filter(item => !item.hidden),
     },
     {
       key: 'residents',
@@ -201,7 +184,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
                   Admin Panel
                 </Title>
                 <p className="text-slate-400 text-sm">
-                  {user?.societyName || 'Society Management'}
+                  {user?.societyName || 'Management System'}
                 </p>
               </div>
             )}
@@ -224,7 +207,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
             <Title level={3} className="!mb-0 !text-slate-800">
               {menuItems.find(item => item.key === currentPage)?.label || 'Dashboard'}
             </Title>
-            <GlobalSearch onSocietySelect={handleSocietySelect} />
           </div>
           
           <div className="flex items-center space-x-4">

@@ -1,14 +1,11 @@
 
 import React, { useState } from 'react';
-import { Card, Table, Button, Modal, Form, DatePicker, TimePicker, Select, Space, Typography, Tag } from 'antd';
-import { PlusOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { usePermissions } from '../hooks/usePermissions';
-import { useSociety } from '../hooks/useSociety';
+import { Card, Table, Button, Space, Typography, Tag } from 'antd';
+import { EyeOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
-const { RangePicker } = TimePicker;
 
 interface Booking {
   id: string;
@@ -25,8 +22,7 @@ interface Booking {
 }
 
 const FacilityBooking: React.FC = () => {
-  const { user } = usePermissions();
-  const { selectedSociety } = useSociety();
+  const { user } = useAppSelector((state) => state.auth);
   
   const [bookings, setBookings] = useState<Booking[]>([
     {
@@ -59,7 +55,7 @@ const FacilityBooking: React.FC = () => {
 
   const filteredBookings = bookings.filter(booking => {
     if (user?.role === 'super_admin') {
-      return selectedSociety ? booking.societyId === selectedSociety.id : true;
+      return true;
     }
     return booking.societyId === user?.societyId;
   });
@@ -180,7 +176,7 @@ const FacilityBooking: React.FC = () => {
             <div>
               <Title level={3} className="!mb-1">
                 Facility Booking Management
-                {selectedSociety && ` - ${selectedSociety.name}`}
+                {user?.societyName && ` - ${user.societyName}`}
               </Title>
               <Text className="text-gray-600">
                 Manage facility bookings and availability
