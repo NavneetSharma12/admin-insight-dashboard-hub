@@ -56,23 +56,31 @@ export const usePermissions = () => {
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('Login attempt:', { email, password });
     setLoading(true);
     setError(null);
     
     try {
       // Mock authentication - replace with your backend API
+      console.log('Available users:', mockUsers);
       const foundUser = mockUsers.find(u => u.email === email);
+      console.log('Found user:', foundUser);
+      console.log('Password check:', password, '===', 'admin123', password === 'admin123');
+      
       if (foundUser && password === 'admin123') {
+        console.log('Login successful for user:', foundUser);
         setUser(foundUser);
         currentUser = foundUser;
         localStorage.setItem('admin_user', JSON.stringify(foundUser));
         setLoading(false);
         return true;
       }
+      console.log('Login failed - invalid credentials');
       setError('Invalid email or password');
       setLoading(false);
       return false;
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
       setLoading(false);
       return false;
