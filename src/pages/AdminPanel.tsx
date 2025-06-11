@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
@@ -32,7 +31,7 @@ const AdminPanel: React.FC = () => {
   const renderContent = () => {
     switch (currentPage) {
       case 'dashboard':
-        return user?.role === 'super_admin' ? <SuperAdminDashboard /> : (
+        return user?.role === 'super_admin' ? <SuperAdminDashboard onNavigate={setCurrentPage} /> : (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
           </ProtectedRoute>
@@ -132,7 +131,7 @@ const AdminPanel: React.FC = () => {
           </ProtectedRoute>
         );
       default:
-        return user?.role === 'super_admin' ? <SuperAdminDashboard /> : (
+        return user?.role === 'super_admin' ? <SuperAdminDashboard onNavigate={setCurrentPage} /> : (
           <ProtectedRoute permission="dashboard.view">
             <Dashboard />
           </ProtectedRoute>
