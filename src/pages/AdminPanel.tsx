@@ -7,6 +7,7 @@ import ResidentList from '../components/ResidentList';
 import PendingRequests from '../components/PendingRequests';
 import PermissionManager from '../components/PermissionManager';
 import UserManagement from '../components/UserManagement';
+import SocietyManagement from '../components/SocietyManagement';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
 import BillingManagement from '../components/BillingManagement';
@@ -36,6 +37,8 @@ const AdminPanel: React.FC = () => {
             <Dashboard />
           </ProtectedRoute>
         );
+      case 'society-management':
+        return <SocietyManagement />;
       case 'resident-list':
         return <ResidentList />;
       case 'pending-requests':

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, Row, Col, Statistic, Table, Button, Space, Typography, Tag } from 'antd';
 import { 
@@ -15,7 +14,11 @@ import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
 
-const SuperAdminDashboard: React.FC = () => {
+interface SuperAdminDashboardProps {
+  onNavigate?: (page: string) => void;
+}
+
+const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onNavigate }) => {
   const [societies] = useState<Society[]>([
     {
       id: '1',
@@ -56,6 +59,12 @@ const SuperAdminDashboard: React.FC = () => {
       status: 'active'
     }
   ]);
+
+  const handleAddSociety = () => {
+    if (onNavigate) {
+      onNavigate('society-management');
+    }
+  };
 
   const columns = [
     {
@@ -125,8 +134,13 @@ const SuperAdminDashboard: React.FC = () => {
             <Title level={2} className="!mb-1">Super Admin Dashboard</Title>
             <Text className="text-gray-600">Manage all societies and administrative functions</Text>
           </div>
-          <Button type="primary" icon={<PlusOutlined />} className="bg-blue-600">
-            Add Society
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />} 
+            className="bg-blue-600"
+            onClick={handleAddSociety}
+          >
+            Manage Societies
           </Button>
         </div>
 
@@ -173,8 +187,13 @@ const SuperAdminDashboard: React.FC = () => {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <Title level={4} className="!mb-0">Society Management</Title>
-            <Button type="primary" icon={<PlusOutlined />} className="bg-blue-600">
-              Add New Society
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              className="bg-blue-600"
+              onClick={handleAddSociety}
+            >
+              Manage Societies
             </Button>
           </div>
           <Table

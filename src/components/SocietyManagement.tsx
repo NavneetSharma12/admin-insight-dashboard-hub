@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar, Badge } from 'antd';
-import { PlusOutlined, EditOutlined, EyeOutlined, HomeOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar, Badge, message } from 'antd';
+import { PlusOutlined, EditOutlined, EyeOutlined, HomeOutlined, UserOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useAppSelector } from '../store/hooks';
 import { Society, CreateSocietyRequest } from '../types/society';
+import { CreateUserRequest } from '../types/user';
 import ProtectedRoute from './ProtectedRoute';
 
 const { Title, Text } = Typography;
@@ -60,8 +61,11 @@ const SocietyManagement: React.FC = () => {
   
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [isCreateAdminModalVisible, setIsCreateAdminModalVisible] = useState(false);
   const [selectedSociety, setSelectedSociety] = useState<Society | null>(null);
+  const [selectedSocietyForAdmin, setSelectedSocietyForAdmin] = useState<Society | null>(null);
   const [form] = Form.useForm();
+  const [adminForm] = Form.useForm();
 
   const filteredSocieties = hasPermission('society.view_all') 
     ? societies 
@@ -81,6 +85,31 @@ const SocietyManagement: React.FC = () => {
     setSocieties(prev => [...prev, newSociety]);
     setIsCreateModalVisible(false);
     form.resetFields();
+    message.success('Society created successfully!');
+  };
+
+  const handleCreateAdmin = (values: CreateUserRequest) => {
+    if (!selectedSocietyForAdmin) return;
+    
+    // In real implementation, this would create the admin user
+    console.log('Creating admin for society:', selectedSocietyForAdmin.name, values);
+    
+    // Update the society with the new admin info
+    setSocieties(prev => prev.map(society => 
+      society.id === selectedSocietyForAdmin.id 
+        ? { ...society, adminName: values.name, adminEmail: values.email }
+        : society
+    ));
+    
+    setIsCreateAdminModalVisible(false);
+    setSelectedSocietyForAdmin(null);
+    adminForm.resetFields();
+    message.success('Admin created successfully!');
+  };
+
+  const handleCreateAdminForSociety = (society: Society) => {
+    setSelectedSocietyForAdmin(society);
+    setIsCreateAdminModalVisible(true);
   };
 
   const handleViewDetails = (society: Society) => {
@@ -174,6 +203,15 @@ const SocietyManagement: React.FC = () => {
               Edit
             </Button>
           )}
+          <Button
+            icon={<UserAddOutlined />}
+            onClick={() => handleCreateAdminForSociety(record)}
+            size="small"
+            type="primary"
+            className="bg-green-600"
+          >
+            Create Admin
+          </Button>
         </Space>
       ),
     },
@@ -188,7 +226,7 @@ const SocietyManagement: React.FC = () => {
               <Title level={3} className="!mb-1">Society Management</Title>
               <Text className="text-gray-600">
                 {hasPermission('society.view_all') 
-                  ? 'Manage all societies in the system' 
+                  ? 'Manage all societies and their administrators' 
                   : 'View your assigned society'}
               </Text>
             </div>
@@ -356,6 +394,84 @@ const SocietyManagement: React.FC = () => {
                   Create Society
                 </Button>
                 <Button onClick={() => setIsCreateModalVisible(false)}>
+                  Cancel
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Create Admin Modal */}
+        <Modal
+          title={`Create Admin for ${selectedSocietyForAdmin?.name}`}
+          open={isCreateAdminModalVisible}
+          onCancel={() => {
+            setIsCreateAdminModalVisible(false);
+            setSelectedSocietyForAdmin(null);
+            adminForm.resetFields();
+          }}
+          footer={null}
+          width={600}
+        >
+          <Form
+            form={adminForm}
+            layout="vertical"
+            onFinish={handleCreateAdmin}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                name="name"
+                label="Admin Name"
+                rules={[{ required: true, message: 'Please enter admin name!' }]}
+              >
+                <Input placeholder="Enter admin name" />
+              </Form.Item>
+
+              <Form.Item
+                name="email"
+                label="Admin Email"
+                rules={[
+                  { required: true, message: 'Please enter admin email!' },
+                  { type: 'email', message: 'Please enter valid email!' }
+                ]}
+              >
+                <Input placeholder="Enter admin email" />
+              </Form.Item>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                name="phone"
+                label="Phone Number"
+              >
+                <Input placeholder="Enter phone number" />
+              </Form.Item>
+
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[{ required: true, message: 'Please enter password!' }]}
+              >
+                <Input.Password placeholder="Enter password" />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="role"
+              label="Role"
+              initialValue="admin"
+            >
+              <Select disabled>
+                <Option value="admin">Admin</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" className="bg-blue-600">
+                  Create Admin
+                </Button>
+                <Button onClick={() => setIsCreateAdminModalVisible(false)}>
                   Cancel
                 </Button>
               </Space>
