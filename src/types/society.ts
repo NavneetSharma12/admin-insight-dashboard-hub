@@ -29,7 +29,4 @@ export interface CreateSocietyRequest {
   contactEmail: string;
   contactPhone: string;
   totalUnits: number;
-  adminName: string;
-  adminEmail: string;
-  adminPassword: string;
 }

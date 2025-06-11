@@ -60,11 +60,13 @@ const SocietyManagement: React.FC = () => {
   ]);
   
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [isCreateAdminModalVisible, setIsCreateAdminModalVisible] = useState(false);
   const [selectedSociety, setSelectedSociety] = useState<Society | null>(null);
   const [selectedSocietyForAdmin, setSelectedSocietyForAdmin] = useState<Society | null>(null);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [adminForm] = Form.useForm();
 
   const filteredSocieties = hasPermission('society.view_all') 
@@ -76,7 +78,9 @@ const SocietyManagement: React.FC = () => {
       id: Date.now().toString(),
       ...values,
       occupiedUnits: 0,
-      adminId: Date.now().toString(),
+      adminId: '',
+      adminName: 'No Admin Assigned',
+      adminEmail: '',
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
       status: 'active'
@@ -85,7 +89,32 @@ const SocietyManagement: React.FC = () => {
     setSocieties(prev => [...prev, newSociety]);
     setIsCreateModalVisible(false);
     form.resetFields();
-    message.success('Society created successfully!');
+    message.success('Society created successfully! You can now assign an admin.');
+  };
+
+  const handleEditSociety = (values: any) => {
+    if (!selectedSociety) return;
+    
+    const updatedSociety = {
+      ...selectedSociety,
+      ...values,
+      updatedAt: new Date().toISOString().split('T')[0]
+    };
+    
+    setSocieties(prev => prev.map(society => 
+      society.id === selectedSociety.id ? updatedSociety : society
+    ));
+    
+    setIsEditModalVisible(false);
+    setSelectedSociety(null);
+    editForm.resetFields();
+    message.success('Society updated successfully!');
+  };
+
+  const handleEditClick = (society: Society) => {
+    setSelectedSociety(society);
+    editForm.setFieldsValue(society);
+    setIsEditModalVisible(true);
   };
 
   const handleCreateAdmin = (values: CreateUserRequest) => {
@@ -97,7 +126,7 @@ const SocietyManagement: React.FC = () => {
     // Update the society with the new admin info
     setSocieties(prev => prev.map(society => 
       society.id === selectedSocietyForAdmin.id 
-        ? { ...society, adminName: values.name, adminEmail: values.email }
+        ? { ...society, adminName: values.name, adminEmail: values.email, adminId: Date.now().toString() }
         : society
     ));
     
@@ -142,10 +171,10 @@ const SocietyManagement: React.FC = () => {
       key: 'adminName',
       render: (adminName: string, record: Society) => (
         <div className="flex items-center space-x-2">
-          <Avatar size="small" icon={<UserOutlined />} className="bg-green-600" />
+          <Avatar size="small" icon={<UserOutlined />} className={record.adminId ? "bg-green-600" : "bg-gray-400"} />
           <div>
             <div className="text-sm font-medium">{adminName}</div>
-            <div className="text-xs text-gray-500">{record.adminEmail}</div>
+            <div className="text-xs text-gray-500">{record.adminEmail || 'No email assigned'}</div>
           </div>
         </div>
       ),
@@ -198,6 +227,7 @@ const SocietyManagement: React.FC = () => {
           {hasPermission('society.edit') && (
             <Button
               icon={<EditOutlined />}
+              onClick={() => handleEditClick(record)}
               size="small"
             >
               Edit
@@ -346,47 +376,16 @@ const SocietyManagement: React.FC = () => {
               </Form.Item>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="contactEmail"
-                label="Contact Email"
-                rules={[
-                  { required: true, message: 'Please enter contact email!' },
-                  { type: 'email', message: 'Please enter valid email!' }
-                ]}
-              >
-                <Input placeholder="Enter contact email" />
-              </Form.Item>
-
-              <Form.Item
-                name="adminName"
-                label="Admin Name"
-                rules={[{ required: true, message: 'Please enter admin name!' }]}
-              >
-                <Input placeholder="Enter admin name" />
-              </Form.Item>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="adminEmail"
-                label="Admin Email"
-                rules={[
-                  { required: true, message: 'Please enter admin email!' },
-                  { type: 'email', message: 'Please enter valid email!' }
-                ]}
-              >
-                <Input placeholder="Enter admin email" />
-              </Form.Item>
-
-              <Form.Item
-                name="adminPassword"
-                label="Admin Password"
-                rules={[{ required: true, message: 'Please enter admin password!' }]}
-              >
-                <Input.Password placeholder="Enter admin password" />
-              </Form.Item>
-            </div>
+            <Form.Item
+              name="contactEmail"
+              label="Contact Email"
+              rules={[
+                { required: true, message: 'Please enter contact email!' },
+                { type: 'email', message: 'Please enter valid email!' }
+              ]}
+            >
+              <Input placeholder="Enter contact email" />
+            </Form.Item>
 
             <Form.Item>
               <Space>
@@ -394,6 +393,133 @@ const SocietyManagement: React.FC = () => {
                   Create Society
                 </Button>
                 <Button onClick={() => setIsCreateModalVisible(false)}>
+                  Cancel
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Edit Society Modal */}
+        <Modal
+          title="Edit Society"
+          open={isEditModalVisible}
+          onCancel={() => {
+            setIsEditModalVisible(false);
+            setSelectedSociety(null);
+            editForm.resetFields();
+          }}
+          footer={null}
+          width={800}
+        >
+          <Form
+            form={editForm}
+            layout="vertical"
+            onFinish={handleEditSociety}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                name="name"
+                label="Society Name"
+                rules={[{ required: true, message: 'Please enter society name!' }]}
+              >
+                <Input placeholder="Enter society name" />
+              </Form.Item>
+
+              <Form.Item
+                name="contactPhone"
+                label="Contact Phone"
+                rules={[{ required: true, message: 'Please enter contact phone!' }]}
+              >
+                <Input placeholder="Enter contact phone" />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="description"
+              label="Description"
+              rules={[{ required: true, message: 'Please enter description!' }]}
+            >
+              <TextArea rows={3} placeholder="Enter society description" />
+            </Form.Item>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item
+                name="address"
+                label="Address"
+                rules={[{ required: true, message: 'Please enter address!' }]}
+              >
+                <Input placeholder="Enter address" />
+              </Form.Item>
+
+              <Form.Item
+                name="city"
+                label="City"
+                rules={[{ required: true, message: 'Please enter city!' }]}
+              >
+                <Input placeholder="Enter city" />
+              </Form.Item>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <Form.Item
+                name="state"
+                label="State"
+                rules={[{ required: true, message: 'Please select state!' }]}
+              >
+                <Select placeholder="Select state">
+                  <Option value="Maharashtra">Maharashtra</Option>
+                  <Option value="Delhi">Delhi</Option>
+                  <Option value="Karnataka">Karnataka</Option>
+                  <Option value="Gujarat">Gujarat</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="zipCode"
+                label="Zip Code"
+                rules={[{ required: true, message: 'Please enter zip code!' }]}
+              >
+                <Input placeholder="Enter zip code" />
+              </Form.Item>
+
+              <Form.Item
+                name="totalUnits"
+                label="Total Units"
+                rules={[{ required: true, message: 'Please enter total units!' }]}
+              >
+                <Input type="number" placeholder="Enter total units" />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              name="contactEmail"
+              label="Contact Email"
+              rules={[
+                { required: true, message: 'Please enter contact email!' },
+                { type: 'email', message: 'Please enter valid email!' }
+              ]}
+            >
+              <Input placeholder="Enter contact email" />
+            </Form.Item>
+
+            <Form.Item
+              name="status"
+              label="Status"
+              rules={[{ required: true, message: 'Please select status!' }]}
+            >
+              <Select placeholder="Select status">
+                <Option value="active">Active</Option>
+                <Option value="inactive">Inactive</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" className="bg-blue-600">
+                  Update Society
+                </Button>
+                <Button onClick={() => setIsEditModalVisible(false)}>
                   Cancel
                 </Button>
               </Space>
@@ -521,10 +647,10 @@ const SocietyManagement: React.FC = () => {
 
               <Card size="small" title="Admin Details">
                 <div className="flex items-center space-x-3">
-                  <Avatar icon={<UserOutlined />} className="bg-green-600" />
+                  <Avatar icon={<UserOutlined />} className={selectedSociety.adminId ? "bg-green-600" : "bg-gray-400"} />
                   <div>
                     <p className="font-medium">{selectedSociety.adminName}</p>
-                    <p className="text-sm text-gray-500">{selectedSociety.adminEmail}</p>
+                    <p className="text-sm text-gray-500">{selectedSociety.adminEmail || 'No admin assigned'}</p>
                   </div>
                 </div>
               </Card>
@@ -541,3 +667,5 @@ const SocietyManagement: React.FC = () => {
 };
 
 export default SocietyManagement;
+
+</edits_to_apply>
