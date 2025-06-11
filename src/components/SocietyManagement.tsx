@@ -667,5 +667,3 @@ const SocietyManagement: React.FC = () => {
 };
 
 export default SocietyManagement;
-
-</edits_to_apply>
