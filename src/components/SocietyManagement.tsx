@@ -63,11 +63,13 @@ const SocietyManagement: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [isCreateAdminModalVisible, setIsCreateAdminModalVisible] = useState(false);
+  const [isUpdateAdminModalVisible, setIsUpdateAdminModalVisible] = useState(false);
   const [selectedSociety, setSelectedSociety] = useState<Society | null>(null);
   const [selectedSocietyForAdmin, setSelectedSocietyForAdmin] = useState<Society | null>(null);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [adminForm] = Form.useForm();
+  const [updateAdminForm] = Form.useForm();
 
   const filteredSocieties = hasPermission('society.view_all') 
     ? societies 
@@ -134,6 +136,32 @@ const SocietyManagement: React.FC = () => {
     setSelectedSocietyForAdmin(null);
     adminForm.resetFields();
     message.success('Admin created successfully!');
+  };
+
+  const handleUpdateAdmin = (values: any) => {
+    if (!selectedSociety) return;
+    
+    // Update the society with the new admin info
+    setSocieties(prev => prev.map(society => 
+      society.id === selectedSociety.id 
+        ? { ...society, adminName: values.adminName, adminEmail: values.adminEmail }
+        : society
+    ));
+    
+    // Update the selected society for the detail modal
+    setSelectedSociety(prev => prev ? { ...prev, adminName: values.adminName, adminEmail: values.adminEmail } : null);
+    
+    setIsUpdateAdminModalVisible(false);
+    updateAdminForm.resetFields();
+    message.success('Admin details updated successfully!');
+  };
+
+  const handleUpdateAdminClick = (society: Society) => {
+    updateAdminForm.setFieldsValue({
+      adminName: society.adminName,
+      adminEmail: society.adminEmail
+    });
+    setIsUpdateAdminModalVisible(true);
   };
 
   const handleCreateAdminForSociety = (society: Society) => {
@@ -605,6 +633,54 @@ const SocietyManagement: React.FC = () => {
           </Form>
         </Modal>
 
+        {/* Update Admin Modal */}
+        <Modal
+          title={`Update Admin for ${selectedSociety?.name}`}
+          open={isUpdateAdminModalVisible}
+          onCancel={() => {
+            setIsUpdateAdminModalVisible(false);
+            updateAdminForm.resetFields();
+          }}
+          footer={null}
+          width={500}
+        >
+          <Form
+            form={updateAdminForm}
+            layout="vertical"
+            onFinish={handleUpdateAdmin}
+          >
+            <Form.Item
+              name="adminName"
+              label="Admin Name"
+              rules={[{ required: true, message: 'Please enter admin name!' }]}
+            >
+              <Input placeholder="Enter admin name" />
+            </Form.Item>
+
+            <Form.Item
+              name="adminEmail"
+              label="Admin Email"
+              rules={[
+                { required: true, message: 'Please enter admin email!' },
+                { type: 'email', message: 'Please enter valid email!' }
+              ]}
+            >
+              <Input placeholder="Enter admin email" />
+            </Form.Item>
+
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" className="bg-blue-600">
+                  Update Admin
+                </Button>
+                <Button onClick={() => setIsUpdateAdminModalVisible(false)}>
+                  Cancel
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
         {/* Society Details Modal */}
         <Modal
           title="Society Details"
@@ -645,7 +721,21 @@ const SocietyManagement: React.FC = () => {
                 <p>{selectedSociety.description}</p>
               </Card>
 
-              <Card size="small" title="Admin Details">
+              <Card 
+                size="small" 
+                title="Admin Details"
+                extra={
+                  selectedSociety.adminId && (
+                    <Button 
+                      size="small" 
+                      onClick={() => handleUpdateAdminClick(selectedSociety)}
+                      className="text-blue-600"
+                    >
+                      Update Admin
+                    </Button>
+                  )
+                }
+              >
                 <div className="flex items-center space-x-3">
                   <Avatar icon={<UserOutlined />} className={selectedSociety.adminId ? "bg-green-600" : "bg-gray-400"} />
                   <div>
