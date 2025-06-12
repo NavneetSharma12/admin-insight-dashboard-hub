@@ -66,6 +66,12 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onNavigate })
     }
   };
 
+  const handleViewDetails = (society: Society) => {
+    if (onNavigate) {
+      onNavigate('society-management');
+    }
+  };
+
   const columns = [
     {
       title: 'Society',
@@ -116,8 +122,9 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onNavigate })
       key: 'actions',
       render: (_, record: Society) => (
         <Space>
-          <Button icon={<EyeOutlined />} size="small">View</Button>
-          <Button icon={<EditOutlined />} size="small">Edit</Button>
+          <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewDetails(record)}>
+            View Details
+          </Button>
         </Space>
       ),
     },
@@ -129,19 +136,9 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onNavigate })
   return (
     <ProtectedRoute permission="society.view_all">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Title level={2} className="!mb-1">Super Admin Dashboard</Title>
-            <Text className="text-gray-600">Manage all societies and administrative functions</Text>
-          </div>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            className="bg-blue-600"
-            onClick={handleAddSociety}
-          >
-            Manage Societies
-          </Button>
+        <div>
+          <Title level={2} className="!mb-1">Super Admin Dashboard</Title>
+          <Text className="text-gray-600">Overview of all societies and administrative functions</Text>
         </div>
 
         <Row gutter={[16, 16]}>
@@ -185,16 +182,9 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onNavigate })
         </Row>
 
         <Card>
-          <div className="flex items-center justify-between mb-4">
-            <Title level={4} className="!mb-0">Society Management</Title>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
-              className="bg-blue-600"
-              onClick={handleAddSociety}
-            >
-              Manage Societies
-            </Button>
+          <div className="mb-4">
+            <Title level={4} className="!mb-0">Society Overview</Title>
+            <Text className="text-gray-600">Manage and monitor all societies in the system</Text>
           </div>
           <Table
             columns={columns}
