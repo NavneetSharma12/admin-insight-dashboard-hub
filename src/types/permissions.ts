@@ -15,6 +15,8 @@ export type Permission =
   | 'notifications.create'
   | 'reports.view'
   | 'reports.download'
+  | 'reports.create'
+  | 'reports.export'
   | 'society.view'
   | 'society.create'
   | 'society.edit'

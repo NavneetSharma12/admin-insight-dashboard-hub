@@ -66,6 +66,8 @@ const AdminPanel: React.FC = () => {
         return <BillingManagement />;
       case 'bill-type-master':
         return <BillTypeMaster />;
+      case 'reports-module':
+        return <ReportsModule />;
       case 'complaint-management':
         return <ComplaintManagement />;
       case 'facility-booking':
