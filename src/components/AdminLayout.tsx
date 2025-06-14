@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Typography, Badge, Button, Dropdown } from 'antd';
 import {
@@ -90,6 +89,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage, onMenu
       hidden: !hasPermission('reports.view'),
       children: [
         { key: 'billing-management', label: 'Billing Management', hidden: !hasPermission('reports.view') },
+        { key: 'bill-type-master', label: 'Bill Type Master', hidden: !hasPermission('reports.view') },
       ].filter(item => !item.hidden),
     },
     {
