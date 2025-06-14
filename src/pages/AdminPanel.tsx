@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import Dashboard from '../components/Dashboard';
@@ -10,6 +11,7 @@ import SocietyManagement from '../components/SocietyManagement';
 import ActivityFeed from '../components/ActivityFeed';
 import ActivityFilter from '../components/ActivityFilter';
 import BillingManagement from '../components/BillingManagement';
+import BillTypeMaster from '../components/BillTypeMaster';
 import ComplaintManagement from '../components/ComplaintManagement';
 import FacilityBooking from '../components/FacilityBooking';
 import StaffManagement from '../components/StaffManagement';
@@ -62,6 +64,8 @@ const AdminPanel: React.FC = () => {
         );
       case 'billing-management':
         return <BillingManagement />;
+      case 'bill-type-master':
+        return <BillTypeMaster />;
       case 'complaint-management':
         return <ComplaintManagement />;
       case 'facility-booking':

@@ -20,8 +20,53 @@ interface Bill {
   createdAt: string;
 }
 
+interface BillType {
+  id: string;
+  name: string;
+  description?: string;
+  societyId: string;
+  societyName: string;
+  createdAt: string;
+}
+
 const BillingManagement: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
+  
+  // Mock bill types data - in real app this would come from API
+  const [billTypes] = useState<BillType[]>([
+    {
+      id: '1',
+      name: 'Maintenance',
+      description: 'Monthly maintenance charges',
+      societyId: '1',
+      societyName: 'Green Valley Apartments',
+      createdAt: '2024-01-01'
+    },
+    {
+      id: '2',
+      name: 'Water',
+      description: 'Water utility charges',
+      societyId: '1',
+      societyName: 'Green Valley Apartments',
+      createdAt: '2024-01-01'
+    },
+    {
+      id: '3',
+      name: 'Electricity',
+      description: 'Electricity utility charges',
+      societyId: '1',
+      societyName: 'Green Valley Apartments',
+      createdAt: '2024-01-01'
+    },
+    {
+      id: '4',
+      name: 'Parking',
+      description: 'Parking space charges',
+      societyId: '1',
+      societyName: 'Green Valley Apartments',
+      createdAt: '2024-01-01'
+    }
+  ]);
   
   const [bills, setBills] = useState<Bill[]>([
     {
@@ -52,6 +97,14 @@ const BillingManagement: React.FC = () => {
 
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [form] = Form.useForm();
+
+  // Filter bill types by society
+  const availableBillTypes = billTypes.filter(billType => {
+    if (user?.role === 'super_admin') {
+      return true;
+    }
+    return billType.societyId === user?.societyId;
+  });
 
   const filteredBills = bills.filter(bill => {
     if (user?.role === 'super_admin') {
@@ -215,11 +268,16 @@ const BillingManagement: React.FC = () => {
                 rules={[{ required: true, message: 'Please select bill type!' }]}
               >
                 <Select placeholder="Select bill type">
-                  <Option value="Maintenance">Maintenance</Option>
-                  <Option value="Water">Water</Option>
-                  <Option value="Electricity">Electricity</Option>
-                  <Option value="Parking">Parking</Option>
-                  <Option value="Other">Other</Option>
+                  {availableBillTypes.map(billType => (
+                    <Option key={billType.id} value={billType.name}>
+                      {billType.name}
+                      {billType.description && (
+                        <span className="text-gray-500 text-xs ml-2">
+                          - {billType.description}
+                        </span>
+                      )}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
 
