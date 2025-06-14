@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, Avatar } from 'antd';
-import { PlusOutlined, EyeOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Modal, Space, Typography, Tag, Avatar, Input, Select, Row, Col } from 'antd';
+import { PlusOutlined, EyeOutlined, EditOutlined, UserOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { useAppSelector } from '../store/hooks';
 import { Resident } from '../types/user';
 import ProtectedRoute from './ProtectedRoute';
+import ResidentForm from './ResidentForm';
 
 const { Title, Text } = Typography;
+const { Search } = Input;
 const { Option } = Select;
 
 const ResidentList: React.FC = () => {
@@ -40,12 +43,28 @@ const ResidentList: React.FC = () => {
       joinDate: '2024-02-01',
       status: 'active',
       familyMembers: 2
+    },
+    {
+      id: '3',
+      name: 'Carol Davis',
+      email: 'carol@email.com',
+      phone: '+91 9876543212',
+      unitNumber: 'C-301',
+      societyId: '1',
+      societyName: 'Green Valley Apartments',
+      joinDate: '2024-03-10',
+      status: 'pending',
+      familyMembers: 4
     }
   ]);
 
   const [filteredResidents, setFilteredResidents] = useState<Resident[]>([]);
   const [selectedResident, setSelectedResident] = useState<Resident | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [isFormModalVisible, setIsFormModalVisible] = useState(false);
+  const [editingResident, setEditingResident] = useState<Resident | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     let filtered = residents;
@@ -55,12 +74,50 @@ const ResidentList: React.FC = () => {
       filtered = filtered.filter(resident => resident.societyId === user.societyId);
     }
     
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(resident =>
+        resident.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        resident.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        resident.unitNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(resident => resident.status === statusFilter);
+    }
+    
     setFilteredResidents(filtered);
-  }, [residents, user]);
+  }, [residents, user, searchTerm, statusFilter]);
 
   const handleViewDetails = (resident: Resident) => {
     setSelectedResident(resident);
     setIsDetailModalVisible(true);
+  };
+
+  const handleEdit = (resident: Resident) => {
+    setEditingResident(resident);
+    setIsFormModalVisible(true);
+  };
+
+  const handleAdd = () => {
+    setEditingResident(null);
+    setIsFormModalVisible(true);
+  };
+
+  const handleSaveResident = (residentData: Partial<Resident>) => {
+    if (editingResident) {
+      // Update existing resident
+      setResidents(prev => prev.map(r => 
+        r.id === editingResident.id ? { ...r, ...residentData } : r
+      ));
+    } else {
+      // Add new resident
+      setResidents(prev => [...prev, residentData as Resident]);
+    }
+    setIsFormModalVisible(false);
+    setEditingResident(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -138,6 +195,7 @@ const ResidentList: React.FC = () => {
           {hasPermission('residents.edit') && (
             <Button
               icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
               size="small"
             >
               Edit
@@ -166,12 +224,42 @@ const ResidentList: React.FC = () => {
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
+                onClick={handleAdd}
                 className="bg-blue-600"
+                size="large"
               >
                 Add Resident
               </Button>
             )}
           </div>
+
+          {/* Filters and Search */}
+          <Row gutter={[16, 16]} className="mb-4">
+            <Col xs={24} sm={12} md={8}>
+              <Search
+                placeholder="Search residents..."
+                prefix={<SearchOutlined />}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="large"
+              />
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Select
+                placeholder="Filter by status"
+                value={statusFilter}
+                onChange={setStatusFilter}
+                className="w-full"
+                size="large"
+                suffixIcon={<FilterOutlined />}
+              >
+                <Option value="all">All Status</Option>
+                <Option value="active">Active</Option>
+                <Option value="inactive">Inactive</Option>
+                <Option value="pending">Pending</Option>
+              </Select>
+            </Col>
+          </Row>
 
           <Table
             columns={columns}
@@ -180,11 +268,13 @@ const ResidentList: React.FC = () => {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} residents`,
             }}
             className="shadow-sm"
           />
         </Card>
 
+        {/* Resident Details Modal */}
         <Modal
           title="Resident Details"
           open={isDetailModalVisible}
@@ -222,6 +312,29 @@ const ResidentList: React.FC = () => {
               </Card>
             </div>
           )}
+        </Modal>
+
+        {/* Add/Edit Resident Modal */}
+        <Modal
+          title={editingResident ? 'Edit Resident' : 'Add New Resident'}
+          open={isFormModalVisible}
+          onCancel={() => {
+            setIsFormModalVisible(false);
+            setEditingResident(null);
+          }}
+          footer={null}
+          width={800}
+          destroyOnClose
+        >
+          <ResidentForm
+            resident={editingResident || undefined}
+            onSave={handleSaveResident}
+            onCancel={() => {
+              setIsFormModalVisible(false);
+              setEditingResident(null);
+            }}
+            isEditing={!!editingResident}
+          />
         </Modal>
       </div>
     </ProtectedRoute>
