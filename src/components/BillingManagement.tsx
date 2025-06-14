@@ -1,33 +1,14 @@
+
 import React, { useState } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag, DatePicker } from 'antd';
-import { PlusOutlined, EyeOutlined, EditOutlined, DollarCircleOutlined } from '@ant-design/icons';
+import { Card, Button, Form, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
+import BillingTable from './billing/BillingTable';
+import BillForm from './billing/BillForm';
+import { Bill, BillType } from './billing/types';
 
 const { Title, Text } = Typography;
-const { Option } = Select;
-
-interface Bill {
-  id: string;
-  residentName: string;
-  unitNumber: string;
-  billType: string;
-  amount: number;
-  dueDate: string;
-  status: 'paid' | 'pending' | 'overdue';
-  societyId: string;
-  societyName: string;
-  createdAt: string;
-}
-
-interface BillType {
-  id: string;
-  name: string;
-  description?: string;
-  societyId: string;
-  societyName: string;
-  createdAt: string;
-}
 
 const BillingManagement: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -128,69 +109,10 @@ const BillingManagement: React.FC = () => {
     form.resetFields();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'success';
-      case 'pending': return 'warning';
-      case 'overdue': return 'error';
-      default: return 'default';
-    }
+  const handleCancel = () => {
+    setIsCreateModalVisible(false);
+    form.resetFields();
   };
-
-  const columns = [
-    {
-      title: 'Resident',
-      key: 'resident',
-      render: (_, record: Bill) => (
-        <div>
-          <div className="font-medium">{record.residentName}</div>
-          <div className="text-sm text-gray-500">Unit: {record.unitNumber}</div>
-        </div>
-      ),
-    },
-    {
-      title: 'Bill Type',
-      dataIndex: 'billType',
-      key: 'billType',
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount: number) => `₹${amount.toLocaleString()}`,
-    },
-    {
-      title: 'Due Date',
-      dataIndex: 'dueDate',
-      key: 'dueDate',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Society',
-      dataIndex: 'societyName',
-      key: 'societyName',
-      hidden: user?.role !== 'super_admin',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record: Bill) => (
-        <Space>
-          <Button icon={<EyeOutlined />} size="small">View</Button>
-          <Button icon={<EditOutlined />} size="small">Edit</Button>
-        </Space>
-      ),
-    },
-  ].filter(col => !col.hidden);
 
   return (
     <ProtectedRoute permission="reports.view">
@@ -216,100 +138,16 @@ const BillingManagement: React.FC = () => {
             </Button>
           </div>
 
-          <Table
-            columns={columns}
-            dataSource={filteredBills}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-            }}
-            className="shadow-sm"
-          />
+          <BillingTable bills={filteredBills} />
         </Card>
 
-        <Modal
-          title="Generate New Bill"
-          open={isCreateModalVisible}
-          onCancel={() => {
-            setIsCreateModalVisible(false);
-            form.resetFields();
-          }}
-          footer={null}
-          width={600}
-        >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleCreateBill}
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="residentName"
-                label="Resident Name"
-                rules={[{ required: true, message: 'Please enter resident name!' }]}
-              >
-                <Input placeholder="Enter resident name" />
-              </Form.Item>
-
-              <Form.Item
-                name="unitNumber"
-                label="Unit Number"
-                rules={[{ required: true, message: 'Please enter unit number!' }]}
-              >
-                <Input placeholder="Enter unit number" />
-              </Form.Item>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="billType"
-                label="Bill Type"
-                rules={[{ required: true, message: 'Please select bill type!' }]}
-              >
-                <Select placeholder="Select bill type">
-                  {availableBillTypes.map(billType => (
-                    <Option key={billType.id} value={billType.name}>
-                      {billType.name}
-                      {billType.description && (
-                        <span className="text-gray-500 text-xs ml-2">
-                          - {billType.description}
-                        </span>
-                      )}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                name="amount"
-                label="Amount (₹)"
-                rules={[{ required: true, message: 'Please enter amount!' }]}
-              >
-                <Input type="number" placeholder="Enter amount" />
-              </Form.Item>
-            </div>
-
-            <Form.Item
-              name="dueDate"
-              label="Due Date"
-              rules={[{ required: true, message: 'Please select due date!' }]}
-            >
-              <DatePicker className="w-full" />
-            </Form.Item>
-
-            <Form.Item>
-              <Space>
-                <Button type="primary" htmlType="submit" className="bg-blue-600">
-                  Generate Bill
-                </Button>
-                <Button onClick={() => setIsCreateModalVisible(false)}>
-                  Cancel
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Modal>
+        <BillForm
+          visible={isCreateModalVisible}
+          onCancel={handleCancel}
+          onSubmit={handleCreateBill}
+          availableBillTypes={availableBillTypes}
+          form={form}
+        />
       </div>
     </ProtectedRoute>
   );
