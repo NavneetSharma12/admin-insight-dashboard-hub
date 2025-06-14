@@ -7,9 +7,11 @@ import { useAppSelector } from '../../store/hooks';
 
 interface BillingTableProps {
   bills: Bill[];
+  onView: (bill: Bill) => void;
+  onEdit: (bill: Bill) => void;
 }
 
-const BillingTable: React.FC<BillingTableProps> = ({ bills }) => {
+const BillingTable: React.FC<BillingTableProps> = ({ bills, onView, onEdit }) => {
   const { user } = useAppSelector((state) => state.auth);
 
   const getStatusColor = (status: string) => {
@@ -69,8 +71,20 @@ const BillingTable: React.FC<BillingTableProps> = ({ bills }) => {
       key: 'actions',
       render: (_, record: Bill) => (
         <Space>
-          <Button icon={<EyeOutlined />} size="small">View</Button>
-          <Button icon={<EditOutlined />} size="small">Edit</Button>
+          <Button 
+            icon={<EyeOutlined />} 
+            size="small" 
+            onClick={() => onView(record)}
+          >
+            View
+          </Button>
+          <Button 
+            icon={<EditOutlined />} 
+            size="small" 
+            onClick={() => onEdit(record)}
+          >
+            Edit
+          </Button>
         </Space>
       ),
     },
