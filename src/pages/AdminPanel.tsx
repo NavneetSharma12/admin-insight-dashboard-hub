@@ -15,6 +15,7 @@ import BillTypeMaster from '../components/BillTypeMaster';
 import ComplaintManagement from '../components/ComplaintManagement';
 import FacilityBooking from '../components/FacilityBooking';
 import StaffManagement from '../components/StaffManagement';
+import ReportsModule from '../components/ReportsModule';
 import LoginForm from '../components/LoginForm';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useAppSelector } from '../store/hooks';

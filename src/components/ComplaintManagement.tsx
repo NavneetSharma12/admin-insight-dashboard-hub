@@ -3,6 +3,7 @@ import { Card, Table, Button, Modal, Form, Input, Select, Space, Typography, Tag
 import { PlusOutlined, EyeOutlined, EditOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useAppSelector } from '../store/hooks';
 import ProtectedRoute from './ProtectedRoute';
+import ComplaintUpdateModal from './ComplaintUpdateModal';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -22,6 +23,7 @@ interface Complaint {
   assignedTo?: string;
   createdAt: string;
   updatedAt: string;
+  adminNotes?: string;
 }
 
 const ComplaintManagement: React.FC = () => {
@@ -55,12 +57,14 @@ const ComplaintManagement: React.FC = () => {
       societyName: 'Green Valley Apartments',
       assignedTo: 'Maintenance Team',
       createdAt: '2024-01-14',
-      updatedAt: '2024-01-15'
+      updatedAt: '2024-01-15',
+      adminNotes: 'Technician scheduled for tomorrow morning'
     }
   ]);
 
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
 
   const filteredComplaints = complaints.filter(complaint => {
     if (user?.role === 'super_admin') {
@@ -72,6 +76,19 @@ const ComplaintManagement: React.FC = () => {
   const handleViewDetails = (complaint: Complaint) => {
     setSelectedComplaint(complaint);
     setIsDetailModalVisible(true);
+  };
+
+  const handleUpdateComplaint = (complaint: Complaint) => {
+    setSelectedComplaint(complaint);
+    setIsUpdateModalVisible(true);
+  };
+
+  const handleComplaintUpdate = (updatedComplaint: Complaint) => {
+    setComplaints(prev => 
+      prev.map(complaint => 
+        complaint.id === updatedComplaint.id ? updatedComplaint : complaint
+      )
+    );
   };
 
   const getPriorityColor = (priority: string) => {
@@ -162,9 +179,15 @@ const ComplaintManagement: React.FC = () => {
           >
             View
           </Button>
-          <Button icon={<EditOutlined />} size="small">
-            Update
-          </Button>
+          <ProtectedRoute permission="requests.approve">
+            <Button 
+              icon={<EditOutlined />} 
+              size="small"
+              onClick={() => handleUpdateComplaint(record)}
+            >
+              Update
+            </Button>
+          </ProtectedRoute>
         </Space>
       ),
     },
@@ -236,9 +259,22 @@ const ComplaintManagement: React.FC = () => {
               <Card size="small" title="Description">
                 <p>{selectedComplaint.description}</p>
               </Card>
+
+              {selectedComplaint.adminNotes && (
+                <Card size="small" title="Admin Notes">
+                  <p>{selectedComplaint.adminNotes}</p>
+                </Card>
+              )}
             </div>
           )}
         </Modal>
+
+        <ComplaintUpdateModal
+          visible={isUpdateModalVisible}
+          complaint={selectedComplaint}
+          onCancel={() => setIsUpdateModalVisible(false)}
+          onUpdate={handleComplaintUpdate}
+        />
       </div>
     </ProtectedRoute>
   );
